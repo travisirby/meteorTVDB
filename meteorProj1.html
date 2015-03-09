@@ -1,0 +1,50 @@
+<head>
+  <title>meteorProj1</title>
+</head>
+
+<body>
+  <h1>Welcome to Meteor!</h1>
+
+  {{> userDetails}}
+
+</body>
+
+
+<template name="userDetails">
+
+
+  {{> loginButtons}}<br>
+
+
+  {{#if currentUser}}
+
+    {{#with user}}
+
+        <span>{{name}}</span><br>
+        <span>{{email}}</span><br>
+
+        <form>
+          <input type="text" name="userName" value="{{name}}"><br>
+          <input type="text" name="userEmail" value="{{email}}"><br>
+          <input type="text" name="tweet" value=""><br>
+
+          <input type="submit" id="editUser">
+        </form>
+
+        <br>
+
+        {{#each tweets}}
+          {{date}} {{tweet}} <a href="#" class="delete">X</a><br>
+
+        {{/each}}
+
+        {{#each shows}}
+          {{this}}<br>
+        {{/each}}
+
+
+    {{/with}}
+
+  {{/if}}
+
+</template>
