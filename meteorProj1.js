@@ -4,10 +4,6 @@ ChatboutUserTweets = new Meteor.Collection('chatboutUserTweets');
 
 if (Meteor.isClient) {
 
-  Meteor.startup(function () {
-    Session.set('shows', ['Richard']);
-  });
-
   subAllUsers = Meteor.subscribe('allUsers');
   Meteor.subscribe('allTweets');
 
@@ -39,7 +35,7 @@ if (Meteor.isClient) {
       }
       else {
          return data;
-       }
+      }
     },
 
     seriesToSearch: function (){
@@ -47,7 +43,14 @@ if (Meteor.isClient) {
     },
 
     shows: function() {
-      return Session.get('shows');
+      console.log(Session.get('shows'));
+      // if (Session.get('shows') === undefined) {
+      //   return null;
+      // }
+      // else {
+        return Session.get('shows');
+    //  }
+      // return Session.get('shows');
     },
 
     tweets: function() {
@@ -57,7 +60,8 @@ if (Meteor.isClient) {
   });
 
   Template.userDetails.events({
-    'submit form': function(e){
+
+    'submit form': function(e) {
 
       e.preventDefault();
 
@@ -75,7 +79,8 @@ if (Meteor.isClient) {
 
       Session.set('seriesToSearch', searchValue);
 
-      if (searchValue != ""){
+      if (searchValue != "") {
+
           Meteor.call('findSeries', searchValue, 0, function(err, response) {
             if (err) {
               console.log(err);
@@ -96,11 +101,18 @@ if (Meteor.isClient) {
 
     },
 
-    'click .delete': function(e){
+    'click .delete': function(e) {
       ChatboutUserTweets.remove(this._id);
     },
 
-    'click #showImg': function(e){
+    'click .usersShowsDeleteX': function(e) {
+      var parentData = Template.parentData(1);
+      console.log(parentData._id);
+      ChatboutUserInfo.update( parentData._id,
+        { $pull: { trackedTvSeries: { seriesId: this.seriesId } } } );
+    },
+
+    'click #showImg': function(e) {
       Meteor.call('getSeriesXml', this.seriesId, function(err, response) {
         if (err) {
           console.log(err);
@@ -122,6 +134,5 @@ if (Meteor.isServer) {
   Meteor.publish('allTweets', function(){
     return ChatboutUserTweets.find({ userId: this.userId }, { sort: {date: -1}});
   });
-
 
 }

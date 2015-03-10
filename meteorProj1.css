@@ -1,1 +1,20 @@
 /* CSS declarations go here */
+.usersSeriesContainer {
+  background-color: #dfffee;
+  padding: 20px;
+}
+
+.usersSeries {
+  position:relative;
+  float: left;
+  margin: 5px 0 5px 0;
+
+}
+
+.usersShowsDelete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-weight: bold;
+  font-size: 150%;
+}

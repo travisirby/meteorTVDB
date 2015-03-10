@@ -16,3 +16,5 @@ npm-container
 msavin:mongol
 iron:router
 http
+nemo64:bootstrap
+less

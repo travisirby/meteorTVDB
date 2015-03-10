@@ -2,49 +2,83 @@
 
   {{#if subscriptionReady}}
 
-    {{> loginButtons}}<br>
+    {{> loginButtons}}
+
+    <br>
 
     {{#if currentUser}}
 
-      <form>
-        <input type="text" name="seriesToSearch" value="{{seriesToSearch}}"><br>
-        <input type="submit">
-      </form>
+      <div class="container">
 
-      {{#with user}}
+        <div class="row pull-right">
 
-          <span>{{name}}</span><br>
-          <span>{{email}}</span><br>
 
-          <form>
-          </form>
+            <form class="navbar-form navbar-left" role="search">
 
-          <br>
+              <input type="text" name="seriesToSearch" value="{{seriesToSearch}}" class="search-query" placeholder="Search">
+              <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
 
-          {{#each trackedTvSeries}}
-            <img src="http://thetvdb.com/banners/_cache/{{poster}}" width=150>
-          {{/each}}
+            </form>
 
-          <br>
 
-          {{#each tweets}}
-            {{date}} {{tweet}} <a href="#" class="delete">X</a><br>
+        </div>
 
-          {{/each}}
+        {{#with user}}
 
-          {{#each shows}}
-            {{name}}
-            {{seriesId}}<br>
-            <a href src="#" id="showImg">
-              <img src="http://www.thetvdb.com/banners/{{banner}}" height=150 width=600>
-            </a>
+            <span>{{name}}</span><br>
+            <span>{{email}}</span><br>
+
             <br>
-          {{/each}}
+
+            <div class="row row-centered usersSeriesContainer">
 
 
-      {{/with}}
+
+                {{#each trackedTvSeries}}
+
+                  <div class="col-xs-6 col-sm-3 col-md-2 col-lg-2 ">
+
+                    <div class="usersSeries thumbnail">
+
+                      <img src="http://thetvdb.com/banners/_cache/{{poster}}">
+
+                      <div class="usersShowsDelete"><a href="#" class="usersShowsDeleteX btn-default">X</a></div>
+
+                    </div>
+
+                  </div>
+
+
+                {{/each}}
+
+
+            </div>
+
+            <br>
+
+            {{!-- {{#each tweets}}
+              {{date}} {{tweet}} <a href="#" class="delete">X</a><br>
+
+            {{/each}} --}}
+
+            {{#each shows}}
+            <div class="jumbotron">
+              {{name}}
+              {{seriesId}}<br>
+              <a href src="#" id="showImg">
+                <img src="http://www.thetvdb.com/banners/{{banner}}" height=150 width=600>
+              </a>
+              <br>
+            </div>
+            {{/each}}
+
+
+        {{/with}}
+
+      </div>
 
     {{/if}}
+
 
   {{else}}
 

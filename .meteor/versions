@@ -47,6 +47,8 @@ mobile-status-bar@1.0.3-winr.3
 momentjs:moment@2.9.0
 mongo@1.0.12-winr.7
 msavin:mongol@0.6.5
+nemo64:bootstrap@3.3.1_1
+nemo64:bootstrap-data@3.3.1_1
 npm-bcrypt@0.7.8-winr.3
 npm-container@1.0.0
 observe-sequence@1.0.5-winr.3
