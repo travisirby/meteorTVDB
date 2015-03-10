@@ -4,14 +4,12 @@ ChatboutUserTweets = new Meteor.Collection('chatboutUserTweets');
 
 if (Meteor.isClient) {
 
-
-
   Meteor.startup(function () {
     Session.set('shows', ['Richard']);
   });
 
-    Meteor.subscribe('allUsers');
-    Meteor.subscribe('allTweets');
+  subAllUsers = Meteor.subscribe('allUsers');
+  Meteor.subscribe('allTweets');
 
   // Deps.autorun(function() {
   //   if (Meteor.user()){
@@ -22,8 +20,12 @@ if (Meteor.isClient) {
   //   }
   // });
 
-
   Template.userDetails.helpers({
+
+    subscriptionReady: function () {
+      return subAllUsers.ready();
+    },
+
     user: function() {
       data = ChatboutUserInfo.findOne();
       if (!data){
@@ -35,8 +37,13 @@ if (Meteor.isClient) {
         }
         ChatboutUserInfo.insert(data);
       }
-      return data;
+      else {
+         return data;
+       }
+    },
 
+    seriesToSearch: function (){
+      return Session.get('seriesToSearch');
     },
 
     shows: function() {
@@ -46,6 +53,7 @@ if (Meteor.isClient) {
     tweets: function() {
       return ChatboutUserTweets.find();
     }
+
   });
 
   Template.userDetails.events({
@@ -53,47 +61,59 @@ if (Meteor.isClient) {
 
       e.preventDefault();
 
-      ChatboutUserInfo.update(this._id, {
-        $set: {
-          name: e.target.userName.value,
-          email: e.target.userEmail.value,
-        },
+      searchValue = $( "input[name='seriesToSearch']" ).val();
 
-        $push: { trackedTvSeries: e.target.tweet.value }
+      // ChatboutUserInfo.update(this._id, {
+      //   $set: {
+      //     name: e.target.userName.value,
+      //     email: e.target.userEmail.value,
+      //   },
+      //
+      //   $push: { trackedTvSeries: searchValue }
+      //
+      // });
 
-      });
+      Session.set('seriesToSearch', searchValue);
 
-      Meteor.call('sayHello', e.target.tweet.value , function(err, response) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        console.dir(response[0]);
-        Session.set('shows', response);
-	    });
+      if (searchValue != ""){
+          Meteor.call('findSeries', searchValue, 0, function(err, response) {
+            if (err) {
+              console.log(err);
+              return;
+            }
+            Session.set('shows', response);
+          });
+      }
+      else {
+        console.log("series value empty");
+      }
 
-      ChatboutUserTweets.insert({
-        userId: this.userId,
-        tweet: e.target.tweet.value,
-        date: moment().format("ddd, h:mmA")
-      });
-
+      // ChatboutUserTweets.insert({
+      //   userId: this.userId,
+      //   tweet: searchValue,
+      //   date: moment().format("ddd, h:mmA")
+      // });
 
     },
 
     'click .delete': function(e){
       ChatboutUserTweets.remove(this._id);
+    },
+
+    'click #showImg': function(e){
+      Meteor.call('getSeriesXml', this.seriesId, function(err, response) {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        console.log(response);
+      });
     }
   });
 
 }
 
 if (Meteor.isServer) {
-
-  //
-  // Meteor.startup(function () {
-  //
-  // });
 
   Meteor.publish('allUsers', function(){
     return ChatboutUserInfo.find({ userId: this.userId });

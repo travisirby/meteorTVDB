@@ -14,3 +14,5 @@ meteorhacks:npm
 
 npm-container
 msavin:mongol
+iron:router
+http

@@ -1,0 +1,55 @@
+<template name="userDetails">
+
+  {{#if subscriptionReady}}
+
+    {{> loginButtons}}<br>
+
+    {{#if currentUser}}
+
+      <form>
+        <input type="text" name="seriesToSearch" value="{{seriesToSearch}}"><br>
+        <input type="submit">
+      </form>
+
+      {{#with user}}
+
+          <span>{{name}}</span><br>
+          <span>{{email}}</span><br>
+
+          <form>
+          </form>
+
+          <br>
+
+          {{#each trackedTvSeries}}
+            <img src="http://thetvdb.com/banners/_cache/{{poster}}" width=150>
+          {{/each}}
+
+          <br>
+
+          {{#each tweets}}
+            {{date}} {{tweet}} <a href="#" class="delete">X</a><br>
+
+          {{/each}}
+
+          {{#each shows}}
+            {{name}}
+            {{seriesId}}<br>
+            <a href src="#" id="showImg">
+              <img src="http://www.thetvdb.com/banners/{{banner}}" height=150 width=600>
+            </a>
+            <br>
+          {{/each}}
+
+
+      {{/with}}
+
+    {{/if}}
+
+  {{else}}
+
+    <span>Loading</span>
+
+  {{/if}}
+
+</template>

@@ -1,65 +1,103 @@
-var TVDBClient = Meteor.npmRequire("node-tvdb");
-var tvdb       = new TVDBClient("7B48FA26BFDD2412");
+var TVDBClient      = Meteor.npmRequire("node-tvdb"),
+    tvdbApiKey      = '7B48FA26BFDD2412',
+    tvdb            = new TVDBClient(tvdbApiKey),
+    xml2js          = Meteor.npmRequire('xml2js'),
+    resultsPerPage  = 5;
 
+Meteor.startup(function () {
+    var findSeriesAsync = function(name, page, cb) {
 
-Meteor.startup(function (){
-  var getSeriesAsync = function (seriesName, cb) {
-    // if (seriesName){
-    //   tvdb.getSeries(seriesName, function(err, response) {
-    //     if (err){
-    //      console.log("ERROR getSeries tvdb");
-    //     }
-    //     else if (response){
-    //      var shows = [];
-    //       response.forEach(function(show){
-    //         shows.push(show.SeriesName);
-    //         console.log(show.SeriesName);
-    //       });
-    //       cb && cb(null, shows);
-    //     }
-    //     else {
-    //       cb && cb('ERR no response from tvdb');
-    //     }
-    //   });
-    // }
-    // else {
-    //   cb && cb('ERR must have seriesName');
-    // }
-    setTimeout(function() {
-        if (seriesName) {
-          cb && cb(null, 'Hello ' + seriesName);
-        } else {
-          cb && cb('name is mandatory');
+      tvdb.getSeries(name, function(err, response) {
+        if (err) {
+          cb && cb('ERR from tvdb' + err);
         }
-      }, 4000);
-  }
+        else if (response){
+         responseSlice = response.slice(0 + (page * resultsPerPage), resultsPerPage + (page * resultsPerPage) );
+         var shows = [];
+          responseSlice.forEach( function(show) {
+            shows.push( { seriesId: show.seriesid, name: show.SeriesName, banner: show.banner } );
+          });
+          cb && cb(null, shows);
+        }
+        else {
+          cb && cb('ERR no response sent from tvdb');
+        }
+      });
 
-  Meteor.methods({
+    };
 
-   getSeriesByName: function (seriesName) {
+    var getSeriesXmlAsync = function(seriesId, cb) {
+      HTTP.get('http://thetvdb.com/api/' + tvdbApiKey + '/series/' + seriesId + '/all/en.xml',
+        function (err, res) {
+          if (err) {
+            cb && cb('ERR TVDB GET EN.XML' + err);
+            return;
+          }
+          if (res.statusCode === 200){
 
-     var getSeriesAsync = Meteor.wrapAsync(getSeriesAsync),
-                          result;
+          var parser = xml2js.Parser({
+              explicitArray: false,
+              normalizeTags: true
+          });
 
-    try{
-      getSeriesAsync(seriesName);
-      console.log(result);
-      return result;
-    } catch (e) {
-      console.log(e);
-      throw new Meteor.Error(500, e);
-    }
+          parser.parseString(res.content, function (err, result) {
 
-   },
+            console.log(result.data.series.id);
 
-   welcome: function (name) {
-   console.log('on server, welcome called with name: ', name);
-   if(name==undefined || name.length<=0) {
-       throw new Meteor.Error(404, "Please enter your name");
-   }
-     return "Welcome " + name;
-   }
+            // checks trackedTvSeries array for this series Id. if found dont add show
+            var usersShows = ChatboutUserInfo.findOne(
+              { trackedTvSeries : { $elemMatch: { seriesId: result.data.series.id } } } );
 
-  });
+            if (usersShows) {
+              console.log("SHOW ALREADY IN USER'S COLLECTION");
+            }
+            else {
+              ChatboutUserInfo.update( { userId: Meteor.userId() },
+                { $push:
+                  { trackedTvSeries:
+                    { seriesId: result.data.series.id,
+                      poster: result.data.series.poster
+                    }
+                  }
+              });
+            }
+          });
 
+          cb && cb(null, res);
+        }
+
+      });
+    };
+
+    Meteor.methods({
+
+      findSeries: function(name, page) {
+        var findSeries = Meteor.wrapAsync(findSeriesAsync),
+            result;
+        try {
+          result = findSeries(name, page);
+          return result;
+
+        } catch (e) {
+          console.log('ERR findSeries ', e.message);
+          throw new Meteor.Error(500, e);
+        }
+      },
+
+      getSeriesXml: function (seriesId) {
+
+        var getSeries = Meteor.wrapAsync(getSeriesXmlAsync),
+            result;
+
+        try {
+          result = getSeries(seriesId);
+          return result;
+        }
+        catch (e) {
+          console.log('ERR getSeriesXml ', e.message);
+          throw new Meteor.Error(500, e);
+        }
+      }
+
+    });
 });
